@@ -6,7 +6,6 @@ PARSER=~/Lab/parser
 IRSIM=~/compilers-tests/irsim/build/irsim
 while [ $tot -lt 100000 ]; do
     ./generator > workdir/tmp.c
-
     if gcc workdir/gcc.c -o workdir/a.out -fsanitize=undefined -fno-sanitize-recover=undefined 2>/dev/null; then
         if ./workdir/a.out < 0s.txt > workdir/gcc_out 2>/dev/null; then
             $PARSER workdir/tmp.c workdir/a.ir;

@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include <assert.h>
 
-int no = 0, indent = 0;
+int no = 0, indent = 0, is_main = 0;
 void expr();
 void stmt();
 void stmts(int);
@@ -54,21 +54,8 @@ void ra() {
 void singleton() {
     if((randuint()&31) == 0) {
         printf("read()");
-    } else 
-    if(randuint()&3) {
-        ra();
     } else {
-        if(no == 0 || randuint()&15) {
-            printf("%d", randuint()&15);
-        } else {
-            printf("f%d(", randuint()%no);
-            expr();
-            printf(", ");
-            expr();
-            printf(", ");
-            printf("a%d%d", no, 5 + (randuint()&1));
-            printf(")");
-        }
+        ra();
     }
 }
 void parent_expr() {
@@ -109,14 +96,22 @@ void expr() {
             raw_expr();
             printf(")");
             break;
+        case 2:
+            printf("!(");
+            raw_expr();
+            printf(")");
+            break;
         default:
             raw_expr();
             break;
     }
 }
 void stmt_return() {
-    //output("return "); expr(); printf(";\n");
-    output("return 0;\n");
+    if(is_main) {
+        output("return 0;\n");
+    } else {
+        output("return "); expr(); printf(";\n");
+    }
 }
 void stmt_if() {
     output("if(");
@@ -138,7 +133,7 @@ void stmt_if() {
         indent += 4;
         stmt(2);
         indent -= 4;
-        output("    }");
+        output("}");
     }
     printf("\n");
 }
@@ -171,6 +166,18 @@ void stmt() {
         case 2:
                 stmt_while();
                 return;
+        case 3:
+                if(no == 0 || rand()&15) {
+                    printf("%d", rand()&15);
+                } else {
+                    printf("f%d(", rand()%no);
+                    expr();
+                    printf(", ");
+                    expr();
+                    printf(", ");
+                    printf("a%d%d", no, 5 + (rand()&1));
+                    printf(")");
+                }
         case 14:
                 if((randuint()&3) == 0) {
                     stmt_return();
@@ -205,6 +212,7 @@ void gen_func() {
     output("}\n");
 }
 void gen_main() {
+    is_main = 1;
     output("int main() {\n");
     indent += 4;
     output("int a%d1 = %d;\n", no, randuint()&15);
@@ -228,7 +236,6 @@ int main() {
     for(no = 0; no <= 5; ++no) {
         gen_func();
     }
-    no = 6;
     gen_main();
     return 0;
 }
